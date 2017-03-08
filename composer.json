@@ -5,7 +5,7 @@
   "keywords": ["excel", "export", "PHPExcel"],
   "homepage": "http://www.prezent.nl",
   "require": {
-    "php": "^5.5|^7.0",
+    "php": "^5.4|^7.0",
     "phpoffice/phpexcel": "^1.8"
   },
   "license": "MIT",
