@@ -1,0 +1,30 @@
+{
+  "name": "prezent/excel-exporter",
+  "type": "library",
+  "description": "Wrapper around PHPExcel to export data to Excel",
+  "keywords": ["excel", "export", "PHPExcel"],
+  "homepage": "http://www.prezent.nl",
+  "require": {
+    "php": "^5.5|^7.0",
+    "phpoffice/phpexcel": "^1.8"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Robert-Jan Bijl",
+      "email": "robert-jan@prezent.nl"
+    },
+    {
+      "name": "Prezent Internet B.V.",
+      "email": "github@prezent.nl"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "Prezent\\ExcelExporter\\": "src/" }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  }
+}
