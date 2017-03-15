@@ -123,22 +123,22 @@ class Exporter
      * Generate the file, return its location
      *
      * @param string $filename
-     * @param bool   $completeFormatting
+     * @param string $format
+     * @param bool $disconnect
      * @return array
      */
-    public function generateFile($filename, $completeFormatting = true)
+    public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
     {
-        $this->formatFile($completeFormatting);
-        return $this->writeFileToTmp($filename);
+        $this->formatFile();
+        return $this->writeFileToTmp($filename, $format, $disconnect);
     }
 
     /**
      * Format the file
      *
-     * @param bool $completeFormatting
      * @return boolean
      */
-    protected function formatFile($completeFormatting = true)
+    protected function formatFile()
     {
         // this base class does not do any formatting. Extend this class if you need specific formatting
         return true;
