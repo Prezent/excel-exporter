@@ -77,17 +77,23 @@ class Exporter
             }
         }
 
-        $this->currentRow = 1;
-        $this->currentColumn = reset($this->columns);
+        $this->resetCoordinates();
         $this->file = $this->createFile();
 
         return true;
     }
 
+    /**
+     * Reset the coordinates back to initial values
+     *
+     * @return self
+     */
     public function resetCoordinates()
     {
         $this->currentColumn = reset($this->columns);
         $this->currentRow = 1;
+
+        return $this;
     }
 
     /**
@@ -271,14 +277,13 @@ class Exporter
      * @param \PHPExcel $file
      * @return \PHPExcel
      */
-    protected function createWorksheets(\PHPExcel $file)
+    private function createWorksheets(\PHPExcel $file)
     {
         // create one default sheet
         $file->createSheet();
 
         return $file;
     }
-
 
     /**
      * Create excel file and store in tmp dir
@@ -307,6 +312,19 @@ class Exporter
     }
 
     /**
+     * Get the last key of an array
+     *
+     * @param array $array
+     * @return mixed
+     */
+    private function getLastArrayKey(array $array)
+    {
+        $arrayKeys = array_keys($array);
+
+        return array_pop($arrayKeys);
+    }
+
+    /**
      * Getter for file
      *
      * @return \PHPExcel
@@ -321,7 +339,7 @@ class Exporter
      *
      * @return string
      */
-    public function getMaxColumn()
+    public function getLastColumn()
     {
         return $this->maxColumn;
     }
@@ -329,22 +347,36 @@ class Exporter
     /**
      * Getter for maxRow
      *
+     * @param bool $offsetByOne
      * @return int
      */
-    public function getMaxRow()
+    public function getLastRow($offsetByOne = true)
     {
+        if ($offsetByOne) {
+            return $this->maxRow -1;
+        }
+
         return $this->maxRow;
     }
 
     /**
-     * Reset the max column back to 'A'
+     * Getter for currentRow
      *
-     * @return $this
+     * @return int
      */
-    public function resetMaxColumn()
+    public function getCurrentRow()
     {
-        $this->maxColumn = 'A';
-        return $this;
+        return $this->currentRow;
+    }
+
+    /**
+     * Getter for currentColumn
+     *
+     * @return string
+     */
+    public function getCurrentColumn()
+    {
+        return $this->currentColumn;
     }
 
     /**
@@ -370,28 +402,5 @@ class Exporter
         }
 
         return $usedColumns;
-    }
-
-    /**
-     * Getter for currentRow
-     *
-     * @return int
-     */
-    public function getCurrentRow()
-    {
-        return $this->currentRow;
-    }
-
-    /**
-     * Get the last key of an array
-     *
-     * @param array $array
-     * @return mixed
-     */
-    private function getLastArrayKey(array $array)
-    {
-        $arrayKeys = array_keys($array);
-
-        return array_pop($arrayKeys);
     }
 }
