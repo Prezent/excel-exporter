@@ -108,10 +108,13 @@ class Exporter
             $this->file->setActiveSheetIndex($sheetIndex);
         }
 
-        foreach ($data as $value) {
+        $lastDataKey = $this->getLastArrayKey($data);
+        foreach ($data as $key => $value) {
             $coordinate = sprintf('%s%d', $this->currentColumn, $this->currentRow);
             $sheet->setCellValue($coordinate, $value);
-            $this->nextColumn();
+            if ($key !== $lastDataKey) {
+                $this->nextColumn();
+            }
         }
 
         if ($finalize) {
@@ -377,5 +380,18 @@ class Exporter
     public function getCurrentRow()
     {
         return $this->currentRow;
+    }
+
+    /**
+     * Get the last key of an array
+     *
+     * @param array $array
+     * @return mixed
+     */
+    private function getLastArrayKey(array $array)
+    {
+        $arrayKeys = array_keys($array);
+
+        return array_pop($arrayKeys);
     }
 }
