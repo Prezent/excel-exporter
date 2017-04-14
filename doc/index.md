@@ -2,13 +2,11 @@
 
 A wrapper around [PHPExcel](https://github.com/PHPOffice/PHPExcel), to allow for easy export of data to Excel files.
 
-## Installation
+## Index
 
-This extension can be installed using Composer. Tell composer to install the extension:
-
-```bash
-$ php composer.phar require prezent/excel-exporter
-```
+1. [Installation](installation.md)
+2. [Advanced Usage](advanced-usage.md)
+3. [Styling your exports](styling.md)
 
 ## Quick example
 
