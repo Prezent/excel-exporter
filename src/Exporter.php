@@ -277,7 +277,7 @@ class Exporter
      * @param \PHPExcel $file
      * @return \PHPExcel
      */
-    private function createWorksheets(\PHPExcel $file)
+    protected function createWorksheets(\PHPExcel $file)
     {
         // create one default sheet
         $file->createSheet();
