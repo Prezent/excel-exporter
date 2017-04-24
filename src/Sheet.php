@@ -105,7 +105,7 @@ class Sheet
      *
      * @return string
      */
-    public function getLastColumn()
+    public function getMaxColumn()
     {
         return $this->maxColumn;
     }
@@ -116,7 +116,7 @@ class Sheet
      * @param bool $offsetByOne
      * @return int
      */
-    public function getLastRow($offsetByOne = true)
+    public function getMaxRow($offsetByOne = true)
     {
         if ($offsetByOne) {
             return $this->maxRow -1;
@@ -143,6 +143,16 @@ class Sheet
     public function getCurrentColumn()
     {
         return $this->currentColumn;
+    }
+
+    /**
+     * Getter for worksheet
+     *
+     * @return \PHPExcel_Worksheet
+     */
+    public function getWorksheet()
+    {
+        return $this->worksheet;
     }
 
     /**

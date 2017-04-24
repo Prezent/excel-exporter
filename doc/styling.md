@@ -16,11 +16,11 @@ class StyledExporter extends Exporter
     public function formatFile()
     {
         $sheet = $this->getFile()->getActiveSheet();
-        $lastRow = $this->getLastRow();
-        $lastColumn = $this->getLastColumn();
+        $maxRow = $this->getMaxRow();
+        $maxColumn = $this->getMaxColumn();
     
         // autosize all columns
-        foreach(range('A', $lastColumn) as $columnID) {
+        foreach(range('A', $maxColumn) as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
     
@@ -35,21 +35,21 @@ class StyledExporter extends Exporter
         );
     
         // border around the entire table
-        $sheet->getStyle(sprintf('A1:%s%d', $lastColumn, $lastRow))->applyFromArray($borderStyle);
+        $sheet->getStyle(sprintf('A1:%s%d', $maxColumn, $maxRow))->applyFromArray($borderStyle);
         //border around the hearder
     
         // alignment
-        $sheet->getStyle(sprintf('A1:C%d', $lastRow))
+        $sheet->getStyle(sprintf('A1:C%d', $maxRow))
             ->getAlignment()
             ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT)
         ;
-        $sheet->getStyle(sprintf('D1:%s%d', $lastColumn, $lastRow))
+        $sheet->getStyle(sprintf('D1:%s%d', $maxColumn, $maxRow))
             ->getAlignment()
             ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT)
         ;
     
         // format a specific column as percentage
-        $sheet->getStyle(sprintf('G1:G%s', $lastRow))->getNumberFormat()->applyFromArray([
+        $sheet->getStyle(sprintf('G1:G%s', $maxRow))->getNumberFormat()->applyFromArray([
             'code' => \PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE
         ]);
     
