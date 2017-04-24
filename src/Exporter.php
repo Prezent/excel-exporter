@@ -48,11 +48,12 @@ class Exporter
      *
      * @return self
      */
-    protected function init()
+    final protected function init()
     {
         $this->file = $this->createFile();
-        $this->createWorksheets();
-        $this->initWorksheets();
+        $this->createWorksheets()
+            ->initWorksheets()
+        ;
 
         return $this;
     }
@@ -121,21 +122,23 @@ class Exporter
      * @param bool $disconnect
      * @return array
      */
-    public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
+    final public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
     {
-        $this->formatFile();
-        return $this->writeFileToTmp($filename, $format, $disconnect);
+        return $this
+            ->formatFile()
+            ->writeFileToTmp($filename, $format, $disconnect)
+        ;
     }
 
     /**
      * Format the file
      *
-     * @return boolean
+     * @return self
      */
     protected function formatFile()
     {
         // this base class does not do any formatting. Extend this class if you need specific formatting
-        return true;
+        return $this;
     }
 
     /**
