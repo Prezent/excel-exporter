@@ -46,7 +46,7 @@ class Exporter
     /**
      * Initialize the exporter
      *
-     * @return bool
+     * @return self
      */
     protected function init()
     {
@@ -54,7 +54,7 @@ class Exporter
         $this->createWorksheets();
         $this->initWorksheets();
 
-        return true;
+        return $this;
     }
 
     /**
@@ -74,20 +74,28 @@ class Exporter
     /**
      * Create worksheets
      *
-     * @return boolean
+     * @return self
      */
     protected function createWorksheets()
     {
         // create one default sheet
         $this->file->createSheet();
-        return true;
+
+        return $this;
     }
-    
+
+    /**
+     * Initialize the worksheets, by creating a Sheet object for all of them
+     *
+     * @return self
+     */
     private function initWorksheets()
     {
         foreach ($this->file->getAllSheets() as $index => $worksheet) {
             $this->sheets[$index] = new Sheet($worksheet);
         }
+
+        return $this;
     }
 
     /**
@@ -205,5 +213,20 @@ class Exporter
     public function getSheets()
     {
         return $this->sheets;
+    }
+
+    /**
+     * Get a specific sheet, by sheetIndex
+     *
+     * @param $sheetIndex
+     * @return Sheet
+     */
+    public function getSheet($sheetIndex)
+    {
+        if (!isset($this->sheets[$sheetIndex])) {
+            throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
+        }
+
+        return $this->sheets[$sheetIndex];
     }
 }
