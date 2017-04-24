@@ -1,7 +1,7 @@
 # Styling your exports
 
-Upon calling `generateFile()`, the `formatFile()` function is called. In the base Exporter class, this function does not contain any logic.
-To add some styling to your export files, extend the base Exporter, and add logic to the `formatFile()` function:
+Upon calling `generateFile()`, the `formatFile()` function is called. In the base `Exporter` class, this function does not contain any logic.
+To add some styling to your export files, extend the base `Exporter`, and add logic to the `formatFile()` function:
 
 ```php
 <?php
