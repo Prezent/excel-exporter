@@ -224,7 +224,7 @@ class Exporter
      * @param $sheetIndex
      * @return Sheet
      */
-    public function getSheet($sheetIndex)
+    public function getSheet($sheetIndex = 0)
     {
         if (!isset($this->sheets[$sheetIndex])) {
             throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));

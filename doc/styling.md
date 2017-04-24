@@ -15,9 +15,9 @@ class StyledExporter extends Exporter
      */
     public function formatFile()
     {
-        $sheet = $this->getFile()->getActiveSheet();
-        $maxRow = $this->getMaxRow();
-        $maxColumn = $this->getMaxColumn();
+        $sheet = $this->getSheet()->getWorksheet();
+        $maxRow = $sheet->getMaxRow();
+        $maxColumn = $sheet->getMaxColumn();
     
         // autosize all columns
         foreach(range('A', $maxColumn) as $columnID) {
