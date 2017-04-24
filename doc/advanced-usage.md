@@ -19,7 +19,7 @@ class MultipleSheetExporter extends Exporter
        $this->getFile()->createSheet(0)->setTitle('First Worksheet');
        $this->getFile()->createSheet(1)->setTitle('Second Worksheet');
 
-       return true;
+       return $this;
    } 
 }
 ```

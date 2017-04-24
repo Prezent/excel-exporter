@@ -53,7 +53,7 @@ class StyledExporter extends Exporter
             'code' => \PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE
         ]);
     
-        return true;
+        return $this;
     }
 }
 ```
