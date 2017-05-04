@@ -164,9 +164,9 @@ class Exporter
         header('Pragma: public');
         header(sprintf('Content-Length: %s', filesize($filePath)));
 
-        //Send the content in chunks
-        while (false !== ($chunk = fread($handler, 4096))) {
-            echo $chunk;
+        // Send the content in chunks
+        while (!feof($handler)) {
+            echo fread($handler, 4096);
         }
 
         return true;
