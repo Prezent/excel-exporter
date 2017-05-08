@@ -35,6 +35,11 @@ class Exporter
     private $filePath;
 
     /**
+     * @var bool
+     */
+    private $generated = false;
+
+    /**
      * @param string $tempPath
      */
     public function __construct($tempPath)
@@ -124,10 +129,14 @@ class Exporter
      */
     final public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
     {
-        return $this
+        list($path, $filename) = $this
             ->formatFile()
             ->writeFileToTmp($filename, $format, $disconnect)
         ;
+
+        $this->setGenerated(true);
+
+        return array($path, $filename);
     }
 
     /**
@@ -144,16 +153,22 @@ class Exporter
     /**
      * Output a file to the browser
      *
-     * @param string $filePath
      * @param string $fileName
+     * @param string $format
+     * @param bool $disconnect
      * @return bool
      */
-    public function outputFile($filePath = null, $fileName = null)
+    public function outputFile($fileName = null, $format = 'Excel2007', $disconnect = true)
     {
-        $fileName = null === $fileName ? $this->fileName : $fileName;
-        $filePath = null === $filePath ? $this->filePath : $filePath;
+        if (!$this->generated) {
+            $this->generateFile($fileName, $format, $disconnect);
+        }
 
-        $handler = fopen($filePath, 'r');
+        if (null === $fileName) {
+            $fileName = $this->fileName;
+        }
+
+        $handler = fopen($this->filePath, 'r');
 
         header('Content-Description: File Transfer');
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -162,7 +177,7 @@ class Exporter
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header(sprintf('Content-Length: %s', filesize($filePath)));
+        header(sprintf('Content-Length: %s', filesize($this->filePath)));
 
         // Send the content in chunks
         while (!feof($handler)) {
@@ -196,6 +211,18 @@ class Exporter
         $this->filePath = $path;
 
         return array($path, $filename);
+    }
+
+    /**
+     * Setter for generated
+     *
+     * @param bool $generated
+     * @return self
+     */
+    public function setGenerated($generated)
+    {
+        $this->generated = $generated;
+        return $this;
     }
 
     /**
