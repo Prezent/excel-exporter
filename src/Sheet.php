@@ -12,7 +12,7 @@ class Sheet
     /**
      * @var string
      */
-    private $currentColumn;
+    private $currentColumn = 'A';
 
     /**
      * @var string
@@ -27,7 +27,7 @@ class Sheet
     /**
      * @var int
      */
-    private $currentRow = 'A';
+    private $currentRow = 1;
 
     /**
      * @var array
