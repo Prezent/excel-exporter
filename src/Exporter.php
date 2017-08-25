@@ -259,4 +259,21 @@ class Exporter
 
         return $this->sheets[$sheetIndex];
     }
+
+    /**
+     * Set the title for a certain worksheet. Defaults to the first sheet
+     *
+     * @param string $title
+     * @param int $sheetIndex
+     * @return self
+     */
+    public function setWorksheetTitle($title, $sheetIndex = 0)
+    {
+        if (!isset($this->sheets[$sheetIndex])) {
+            throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
+        }
+
+        $this->sheets[$sheetIndex]->getWorksheet()->setTitle($title);
+        return $this;
+    }
 }
