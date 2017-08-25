@@ -26,7 +26,7 @@ $exporter->writeRow($data);
 list($path, $filename) = $exporter->generateFile('export.xlsx');
 
 // stream to browser
-$exporter->outputFile($path, $filename);
+$exporter->outputFile($filename);
 ```
 
 ## Documentation
