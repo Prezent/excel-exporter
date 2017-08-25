@@ -129,11 +129,12 @@ class Exporter
      */
     final public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
     {
-        list($path, $filename) = $this
-            ->formatFile()
-            ->writeFileToTmp($filename, $format, $disconnect)
-        ;
+        // perform the formatting
+        $this->formatFile();
+        // set the first sheet active, to make sure that is the sheet people see when they open the file
+        $this->file->setActiveSheetIndex(0);
 
+        list($path, $filename) = $this->writeFileToTmp($filename, $format, $disconnect);
         $this->setGenerated(true);
 
         return array($path, $filename);
