@@ -2,6 +2,8 @@
 
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+
 /**
  * Prezent\ExcelExporter\Sheet
  *
@@ -35,15 +37,15 @@ class Sheet
     private $columns = 1;
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var Worksheet
      */
     private $worksheet;
 
     /**
      * Sheet constructor.
-     * @param \PHPExcel_Worksheet $worksheet
+     * @param Worksheet $worksheet
      */
-    public function __construct(\PHPExcel_Worksheet $worksheet)
+    public function __construct(Worksheet $worksheet)
     {
         $this->worksheet = $worksheet;
         $this->columns = range('A', 'Z');
@@ -148,7 +150,7 @@ class Sheet
     /**
      * Getter for worksheet
      *
-     * @return \PHPExcel_Worksheet
+     * @return Worksheet
      */
     public function getWorksheet()
     {
