@@ -2,15 +2,35 @@
 
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 /**
- * ExcelExporter
+ * Prezent\ExcelExporter\ExcelExporter
  *
  * @author      Robert-Jan Bijl <robert-jan@prezent.nl>
  */
 class Exporter
 {
     /**
-     * @var \PHPExcel
+     * Mapping from PHPExcel formats to PHPSpreadsheet formats, for BC
+     * @var array
+     */
+    private $formatMapping = [
+        'CSV' => 'Csv',
+        'Excel2003XML' => 'Xml',
+        'Excel2007' => 'Xlsx',
+        'Excel5' => 'Xls',
+        'Gnumeric' => 'Gnumeric',
+        'HTML' => 'Html',
+        'OOCalc' => 'Ods',
+        'OpenDocument' => 'Ods',
+        'PDF' => 'Pdf',
+        'SYLK' => 'Slk',
+    ];
+
+    /**
+     * @var Spreadsheet
      */
     private $file;
 
@@ -41,6 +61,7 @@ class Exporter
 
     /**
      * @param string $tempPath
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function __construct($tempPath)
     {
@@ -52,6 +73,7 @@ class Exporter
      * Initialize the exporter
      *
      * @return self
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     final protected function init()
     {
@@ -66,21 +88,19 @@ class Exporter
     /**
      * Create the PHPExcel instance to work in
      *
-     * @return \PHPExcel
+     * @return Spreadsheet
      */
     private function createFile()
     {
-        $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
-        $cacheSettings = array('memoryCacheSize' => '128MB');
-        \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
-
-        return new \PHPExcel();
+        // todo: caching
+        return new Spreadsheet();
     }
 
     /**
      * Create worksheets
      *
      * @return self
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function createWorksheets()
     {
@@ -126,14 +146,17 @@ class Exporter
      * @param string $format
      * @param bool $disconnect
      * @return array
+     * @throws \Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    final public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
+    final public function generateFile($filename, $format = 'Xlsx', $disconnect = true)
     {
         // perform the formatting
         $this->formatFile();
         // set the first sheet active, to make sure that is the sheet people see when they open the file
         $this->file->setActiveSheetIndex(0);
 
+        $format = $this->convertFormat($format);
         list($path, $filename) = $this->writeFileToTmp($filename, $format, $disconnect);
         $this->setGenerated(true);
 
@@ -158,9 +181,12 @@ class Exporter
      * @param string $format
      * @param bool $disconnect
      * @return bool
+     * @throws \Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function outputFile($fileName = null, $format = 'Excel2007', $disconnect = true)
+    public function outputFile($fileName = null, $format = 'Xlsx', $disconnect = true)
     {
+        $format = $this->convertFormat($format);
         if (!$this->generated) {
             $this->generateFile($fileName, $format, $disconnect);
         }
@@ -197,10 +223,12 @@ class Exporter
      * @throws \Exception
      * @return array
      */
-    private function writeFileToTmp($filename, $format = 'Excel2007', $disconnect = true)
+    private function writeFileToTmp($filename, $format = 'Xlsx', $disconnect = true)
     {
+        $format = $this->convertFormat($format);
         $path = sprintf('%s/%s', $this->tempPath, $filename);
-        $objWriter = \PHPExcel_IOFactory::createWriter($this->file, $format);
+
+        $objWriter = IOFactory::createWriter($this->file, $format);
         $objWriter->save($path);
 
         if ($disconnect) {
@@ -229,7 +257,7 @@ class Exporter
     /**
      * Getter for file
      *
-     * @return \PHPExcel
+     * @return Spreadsheet
      */
     public function getFile()
     {
