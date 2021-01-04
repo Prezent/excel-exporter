@@ -345,4 +345,44 @@ class Exporter
     {
         return $this->generated;
     }
+
+    /**
+     * Getter for tempPath
+     *
+     * @return string
+     */
+    public function getTempPath()
+    {
+        return $this->tempPath;
+    }
+
+    /**
+     * Getter for fileName
+     *
+     * @return string
+     */
+    public function getFileName()
+    {
+        return $this->fileName;
+    }
+
+    /**
+     * Getter for filePath
+     *
+     * @return string
+     */
+    public function getFilePath()
+    {
+        return $this->filePath;
+    }
+
+    /**
+     * Getter for generated
+     *
+     * @return bool
+     */
+    public function isGenerated()
+    {
+        return $this->generated;
+    }
 }
