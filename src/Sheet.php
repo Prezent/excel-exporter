@@ -103,7 +103,7 @@ class Sheet
         $this->setMaxRow(count($data));
 
         // The max column is the max size of one of the rows in the array
-        $maxColumn = array_reduce($data, function(int $maxColumn, array $rowData) {
+        $maxColumn = array_reduce($data, function (int $maxColumn, array $rowData) {
             $maxColumn = max($maxColumn, count($rowData));
 
             return $maxColumn;

@@ -240,6 +240,7 @@ class Exporter
     public function setGenerated(bool $generated): self
     {
         $this->generated = $generated;
+
         return $this;
     }
 
@@ -292,6 +293,7 @@ class Exporter
         }
 
         $this->sheets[$sheetIndex]->getWorksheet()->setTitle($title);
+
         return $this;
     }
 
