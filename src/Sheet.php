@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
@@ -78,13 +82,45 @@ class Sheet
     }
 
     /**
+     * Write all data for a sheet at once
+     *
+     * @param array $data
+     * @param bool $advancedValueBinder
+     * @return self
+     * @throws Exception
+     */
+    public function writeData(array $data, bool $advancedValueBinder = true): self
+    {
+        if ($advancedValueBinder) {
+            Cell::setValueBinder(new AdvancedValueBinder());
+        }
+
+        $this->worksheet->fromArray($data);
+
+        // update the sheet dimension
+
+        // The max row is simply the size of the array
+        $this->setMaxRow(count($data));
+
+        // The max column is the max size of one of the rows in the array
+        $maxColumn = array_reduce($data, function(int $maxColumn, array $rowData) {
+            $maxColumn = max($maxColumn, count($rowData));
+
+            return $maxColumn;
+        }, 0);
+        $this->setMaxColumn(Coordinate::stringFromColumnIndex($maxColumn));
+
+        return $this;
+    }
+
+    /**
      * Write a row in the sheet
      *
      * @param array $data
      * @param bool $finalize
      * @return self
      */
-    public function writeRow(array $data = [], $finalize = true)
+    public function writeRow(array $data = [], bool $finalize = true): self
     {
         $lastDataKey = $this->getLastArrayKey($data);
         foreach ($data as $key => $value) {
@@ -240,16 +276,40 @@ class Sheet
     }
 
     /**
+     * Setter for maxRow
+     *
+     * @param int $maxRow
+     * @return self
+     */
+    private function setMaxRow(int $maxRow): self
+    {
+        $this->maxRow = $maxRow;
+
+        return $this;
+    }
+
+    /**
+     * Setter for maxColumn
+     *
+     * @param string $maxColumn
+     * @return self
+     */
+    public function setMaxColumn(string $maxColumn): self
+    {
+        $this->maxColumn = $maxColumn;
+
+        return $this;
+    }
+
+    /**
      * Update the max row
      *
      * @param int $currentRow
-     * @return bool
+     * @return self
      */
-    private function updateMaxRow(int $currentRow): bool
+    private function updateMaxRow(int $currentRow): self
     {
-        $this->maxRow = max($currentRow, $this->maxRow);
-
-        return true;
+        return $this->setMaxRow(max($currentRow, $this->maxRow));
     }
 
 

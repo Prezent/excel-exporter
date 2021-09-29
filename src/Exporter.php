@@ -1,34 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
- * Prezent\ExcelExporter\ExcelExporter
- *
- * @author      Robert-Jan Bijl <robert-jan@prezent.nl>
+ * @author Robert-Jan Bijl <robert-jan@prezent.nl>
  */
 class Exporter
 {
-    /**
-     * Mapping from PHPExcel formats to PHPSpreadsheet formats, for BC
-     * @var array
-     */
-    private $formatMapping = [
-        'CSV' => 'Csv',
-        'Excel2003XML' => 'Xml',
-        'Excel2007' => 'Xlsx',
-        'Excel5' => 'Xls',
-        'Gnumeric' => 'Gnumeric',
-        'HTML' => 'Html',
-        'OOCalc' => 'Ods',
-        'OpenDocument' => 'Ods',
-        'PDF' => 'Pdf',
-        'SYLK' => 'Slk',
-    ];
-
     /**
      * @var Spreadsheet
      */
@@ -60,10 +44,17 @@ class Exporter
     private $generated = false;
 
     /**
-     * @param string $tempPath
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * Array containing the data per sheetIndex
+     *
+     * @var array
      */
-    public function __construct($tempPath)
+    private $data = [];
+
+    /**
+     * @param string $tempPath
+     * @throws Exception
+     */
+    public function __construct(string $tempPath)
     {
         $this->tempPath = $tempPath;
         $this->init();
@@ -73,9 +64,9 @@ class Exporter
      * Initialize the exporter
      *
      * @return self
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
-    final protected function init()
+    final protected function init(): self
     {
         $this->file = $this->createFile();
         $this->createWorksheets()
@@ -90,7 +81,7 @@ class Exporter
      *
      * @return Spreadsheet
      */
-    private function createFile()
+    private function createFile(): Spreadsheet
     {
         // todo: caching
         return new Spreadsheet();
@@ -100,9 +91,9 @@ class Exporter
      * Create worksheets
      *
      * @return self
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
-    protected function createWorksheets()
+    protected function createWorksheets(): self
     {
         // create one default sheet
         $this->file->createSheet();
@@ -115,7 +106,7 @@ class Exporter
      *
      * @return self
      */
-    private function initWorksheets()
+    private function initWorksheets(): self
     {
         foreach ($this->file->getAllSheets() as $index => $worksheet) {
             $this->sheets[$index] = new Sheet($worksheet);
@@ -129,14 +120,14 @@ class Exporter
      *
      * @param array $data
      * @param int $sheetIndex
-     * @param bool $finalize
-     * @return Sheet
+     * @return self
      * @throws \Exception
      */
-    public function writeRow(array $data = [], $sheetIndex = 0, $finalize = true)
+    public function writeRow(array $data = [], int $sheetIndex = 0): self
     {
-        $sheet = $this->sheets[$sheetIndex];
-        return $sheet->writeRow($data, $finalize);
+        $this->data[$sheetIndex][] = $data;
+
+        return $this;
     }
 
     /**
@@ -146,17 +137,19 @@ class Exporter
      * @param string $format
      * @param bool $disconnect
      * @return array
-     * @throws \Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
-    final public function generateFile($filename, $format = 'Xlsx', $disconnect = true)
+    final public function generateFile(string $filename, string $format = 'Xlsx', bool $disconnect = true): array
     {
+        foreach ($this->data as $sheetIndex => $sheetData) {
+            $this->getSheet($sheetIndex)->writeData($sheetData);
+        }
+
         // perform the formatting
         $this->formatFile();
         // set the first sheet active, to make sure that is the sheet people see when they open the file
         $this->file->setActiveSheetIndex(0);
 
-        $format = $this->convertFormat($format);
         list($path, $filename) = $this->writeFileToTmp($filename, $format, $disconnect);
         $this->setGenerated(true);
 
@@ -168,7 +161,7 @@ class Exporter
      *
      * @return self
      */
-    protected function formatFile()
+    protected function formatFile(): self
     {
         // this base class does not do any formatting. Extend this class if you need specific formatting
         return $this;
@@ -180,18 +173,17 @@ class Exporter
      * @param string $fileName
      * @param string $format
      * @param bool $disconnect
-     * @return bool
+     * @return void
      * @throws \Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
-    public function outputFile($fileName = null, $format = 'Xlsx', $disconnect = true)
+    public function outputFile(string $fileName = '', string $format = 'Xlsx', bool $disconnect = true)
     {
-        $format = $this->convertFormat($format);
         if (!$this->generated) {
             $this->generateFile($fileName, $format, $disconnect);
         }
 
-        if (null === $fileName) {
+        if (empty($fileName)) {
             $fileName = $this->fileName;
         }
 
@@ -210,22 +202,19 @@ class Exporter
         while (!feof($handler)) {
             echo fread($handler, 4096);
         }
-
-        return true;
     }
 
     /**
-     * Create excel file and store in tmp dir
+     * Create Excel file and store in tmp dir
      *
      * @param string $filename
      * @param string $format
-     * @param bool   $disconnect
-     * @throws \Exception
+     * @param bool $disconnect
      * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    private function writeFileToTmp($filename, $format = 'Xlsx', $disconnect = true)
+    private function writeFileToTmp(string $filename, string $format = 'Xlsx', bool $disconnect = true): array
     {
-        $format = $this->convertFormat($format);
         $path = sprintf('%s/%s', $this->tempPath, $filename);
 
         $objWriter = IOFactory::createWriter($this->file, $format);
@@ -248,7 +237,7 @@ class Exporter
      * @param bool $generated
      * @return self
      */
-    public function setGenerated($generated)
+    public function setGenerated(bool $generated): self
     {
         $this->generated = $generated;
         return $this;
@@ -259,7 +248,7 @@ class Exporter
      *
      * @return Spreadsheet
      */
-    public function getFile()
+    public function getFile(): Spreadsheet
     {
         return $this->file;
     }
@@ -269,7 +258,7 @@ class Exporter
      *
      * @return Sheet[]
      */
-    public function getSheets()
+    public function getSheets(): array
     {
         return $this->sheets;
     }
@@ -277,10 +266,10 @@ class Exporter
     /**
      * Get a specific sheet, by sheetIndex
      *
-     * @param $sheetIndex
+     * @param int $sheetIndex
      * @return Sheet
      */
-    public function getSheet($sheetIndex = 0)
+    public function getSheet(int $sheetIndex = 0): Sheet
     {
         if (!isset($this->sheets[$sheetIndex])) {
             throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
@@ -296,7 +285,7 @@ class Exporter
      * @param int $sheetIndex
      * @return self
      */
-    public function setWorksheetTitle($title, $sheetIndex = 0)
+    public function setWorksheetTitle(string $title, int $sheetIndex = 0): self
     {
         if (!isset($this->sheets[$sheetIndex])) {
             throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
@@ -311,7 +300,7 @@ class Exporter
      *
      * @return string
      */
-    public function getTempPath()
+    public function getTempPath(): string
     {
         return $this->tempPath;
     }
@@ -321,7 +310,7 @@ class Exporter
      *
      * @return string
      */
-    public function getFileName()
+    public function getFileName(): string
     {
         return $this->fileName;
     }
@@ -331,7 +320,7 @@ class Exporter
      *
      * @return string
      */
-    public function getFilePath()
+    public function getFilePath(): string
     {
         return $this->filePath;
     }
@@ -341,47 +330,7 @@ class Exporter
      *
      * @return bool
      */
-    public function isGenerated()
-    {
-        return $this->generated;
-    }
-
-    /**
-     * Getter for tempPath
-     *
-     * @return string
-     */
-    public function getTempPath()
-    {
-        return $this->tempPath;
-    }
-
-    /**
-     * Getter for fileName
-     *
-     * @return string
-     */
-    public function getFileName()
-    {
-        return $this->fileName;
-    }
-
-    /**
-     * Getter for filePath
-     *
-     * @return string
-     */
-    public function getFilePath()
-    {
-        return $this->filePath;
-    }
-
-    /**
-     * Getter for generated
-     *
-     * @return bool
-     */
-    public function isGenerated()
+    public function isGenerated(): bool
     {
         return $this->generated;
     }
