@@ -1,12 +1,12 @@
 {
   "name": "prezent/excel-exporter",
   "type": "library",
-  "description": "Wrapper around PHPExcel to export data to Excel",
-  "keywords": ["excel", "export", "PHPExcel"],
+  "description": "Wrapper around PhpSpreadsheet to export data to Excel",
+  "keywords": ["excel", "export", "PhpSpreadsheet"],
   "homepage": "https://www.prezent.nl",
   "require": {
-    "php": "^5.5|^7.0",
-    "phpoffice/phpspreadsheet": "^1.1"
+    "php": "^7.0 || ^8.0",
+    "phpoffice/phpspreadsheet": "^1.8"
   },
   "license": "MIT",
   "authors": [
@@ -24,7 +24,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.0.x-dev"
+      "dev-master": "2.0.x-dev"
     }
   }
 }
