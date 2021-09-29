@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prezent\ExcelExporter;
 
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
- * Prezent\ExcelExporter\Sheet
- *
  * @author Robert-Jan Bijl <robert-jan@prezent.nl>
  */
 class Sheet
@@ -60,11 +60,11 @@ class Sheet
 
     /**
      * Reset the coordinates back to initial values
-     *
+     *f
      * @param bool $resetMax
-     * @return Sheet
+     * @return self
      */
-    public function resetCoordinates($resetMax = false)
+    public function resetCoordinates(bool $resetMax = false): self
     {
         $this->currentColumn = reset($this->columns);
         $this->currentRow = 1;
@@ -107,7 +107,7 @@ class Sheet
      *
      * @return string
      */
-    public function getMaxColumn()
+    public function getMaxColumn(): string
     {
         return $this->maxColumn;
     }
@@ -118,10 +118,10 @@ class Sheet
      * @param bool $offsetByOne
      * @return int
      */
-    public function getMaxRow($offsetByOne = true)
+    public function getMaxRow(bool $offsetByOne = true): int
     {
         if ($offsetByOne) {
-            return $this->maxRow -1;
+            return $this->maxRow - 1;
         }
 
         return $this->maxRow;
@@ -132,7 +132,7 @@ class Sheet
      *
      * @return int
      */
-    public function getCurrentRow()
+    public function getCurrentRow(): int
     {
         return $this->currentRow;
     }
@@ -142,7 +142,7 @@ class Sheet
      *
      * @return string
      */
-    public function getCurrentColumn()
+    public function getCurrentColumn(): string
     {
         return $this->currentColumn;
     }
@@ -152,7 +152,7 @@ class Sheet
      *
      * @return Worksheet
      */
-    public function getWorksheet()
+    public function getWorksheet(): Worksheet
     {
         return $this->worksheet;
     }
@@ -162,7 +162,7 @@ class Sheet
      *
      * @return array
      */
-    protected function getUsedColumns()
+    protected function getUsedColumns(): array
     {
         if (strlen($this->maxColumn) == 2) {
             $usedColumns = range('A', 'Z');
@@ -187,7 +187,7 @@ class Sheet
      *
      * @return bool
      */
-    public function nextColumn()
+    public function nextColumn(): bool
     {
         $this->currentColumn = next($this->columns);
         $this->updateMaxColumn($this->currentColumn);
@@ -201,7 +201,7 @@ class Sheet
      * @param bool $reset
      * @return bool
      */
-    public function nextRow($reset = true)
+    public function nextRow(bool $reset = true): bool
     {
         $this->currentRow += 1;
         $this->updateMaxRow($this->currentRow);
@@ -216,9 +216,9 @@ class Sheet
      * Update the max column
      *
      * @param string $currentColumn
-     * @return bool
+     * @return mixed
      */
-    private function updateMaxColumn($currentColumn)
+    private function updateMaxColumn(string $currentColumn)
     {
         $max = $this->maxColumn;
 
@@ -242,10 +242,10 @@ class Sheet
     /**
      * Update the max row
      *
-     * @param $currentRow
+     * @param int $currentRow
      * @return bool
      */
-    private function updateMaxRow($currentRow)
+    private function updateMaxRow(int $currentRow): bool
     {
         $this->maxRow = max($currentRow, $this->maxRow);
 
