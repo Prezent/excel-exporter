@@ -93,7 +93,7 @@ class Exporter
      * @return self
      * @throws Exception
      */
-    protected function createWorksheets(): self
+    protected function createWorksheets()
     {
         // create one default sheet
         $this->file->createSheet();
@@ -161,7 +161,7 @@ class Exporter
      *
      * @return self
      */
-    protected function formatFile(): self
+    protected function formatFile()
     {
         // this base class does not do any formatting. Extend this class if you need specific formatting
         return $this;
