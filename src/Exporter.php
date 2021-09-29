@@ -1,16 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 /**
- * ExcelExporter
- *
- * @author      Robert-Jan Bijl <robert-jan@prezent.nl>
+ * @author Robert-Jan Bijl <robert-jan@prezent.nl>
  */
 class Exporter
 {
     /**
-     * @var \PHPExcel
+     * @var Spreadsheet
      */
     private $file;
 
@@ -40,9 +44,17 @@ class Exporter
     private $generated = false;
 
     /**
-     * @param string $tempPath
+     * Array containing the data per sheetIndex
+     *
+     * @var array
      */
-    public function __construct($tempPath)
+    private $data = [];
+
+    /**
+     * @param string $tempPath
+     * @throws Exception
+     */
+    public function __construct(string $tempPath)
     {
         $this->tempPath = $tempPath;
         $this->init();
@@ -52,8 +64,9 @@ class Exporter
      * Initialize the exporter
      *
      * @return self
+     * @throws Exception
      */
-    final protected function init()
+    final protected function init(): self
     {
         $this->file = $this->createFile();
         $this->createWorksheets()
@@ -66,21 +79,19 @@ class Exporter
     /**
      * Create the PHPExcel instance to work in
      *
-     * @return \PHPExcel
+     * @return Spreadsheet
      */
-    private function createFile()
+    private function createFile(): Spreadsheet
     {
-        $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
-        $cacheSettings = array('memoryCacheSize' => '128MB');
-        \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
-
-        return new \PHPExcel();
+        // todo: caching
+        return new Spreadsheet();
     }
 
     /**
      * Create worksheets
      *
      * @return self
+     * @throws Exception
      */
     protected function createWorksheets()
     {
@@ -95,7 +106,7 @@ class Exporter
      *
      * @return self
      */
-    private function initWorksheets()
+    private function initWorksheets(): self
     {
         foreach ($this->file->getAllSheets() as $index => $worksheet) {
             $this->sheets[$index] = new Sheet($worksheet);
@@ -109,14 +120,14 @@ class Exporter
      *
      * @param array $data
      * @param int $sheetIndex
-     * @param bool $finalize
-     * @return Sheet
+     * @return self
      * @throws \Exception
      */
-    public function writeRow(array $data = [], $sheetIndex = 0, $finalize = true)
+    public function writeRow(array $data = [], int $sheetIndex = 0): self
     {
-        $sheet = $this->sheets[$sheetIndex];
-        return $sheet->writeRow($data, $finalize);
+        $this->data[$sheetIndex][] = $data;
+
+        return $this;
     }
 
     /**
@@ -126,9 +137,14 @@ class Exporter
      * @param string $format
      * @param bool $disconnect
      * @return array
+     * @throws Exception
      */
-    final public function generateFile($filename, $format = 'Excel2007', $disconnect = true)
+    final public function generateFile(string $filename, string $format = 'Xlsx', bool $disconnect = true): array
     {
+        foreach ($this->data as $sheetIndex => $sheetData) {
+            $this->getSheet($sheetIndex)->writeData($sheetData);
+        }
+
         // perform the formatting
         $this->formatFile();
         // set the first sheet active, to make sure that is the sheet people see when they open the file
@@ -157,15 +173,17 @@ class Exporter
      * @param string $fileName
      * @param string $format
      * @param bool $disconnect
-     * @return bool
+     * @return void
+     * @throws \Exception
+     * @throws Exception
      */
-    public function outputFile($fileName = null, $format = 'Excel2007', $disconnect = true)
+    public function outputFile(string $fileName = '', string $format = 'Xlsx', bool $disconnect = true)
     {
         if (!$this->generated) {
             $this->generateFile($fileName, $format, $disconnect);
         }
 
-        if (null === $fileName) {
+        if (empty($fileName)) {
             $fileName = $this->fileName;
         }
 
@@ -184,23 +202,22 @@ class Exporter
         while (!feof($handler)) {
             echo fread($handler, 4096);
         }
-
-        return true;
     }
 
     /**
-     * Create excel file and store in tmp dir
+     * Create Excel file and store in tmp dir
      *
      * @param string $filename
      * @param string $format
-     * @param bool   $disconnect
-     * @throws \Exception
+     * @param bool $disconnect
      * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    private function writeFileToTmp($filename, $format = 'Excel2007', $disconnect = true)
+    private function writeFileToTmp(string $filename, string $format = 'Xlsx', bool $disconnect = true): array
     {
         $path = sprintf('%s/%s', $this->tempPath, $filename);
-        $objWriter = \PHPExcel_IOFactory::createWriter($this->file, $format);
+
+        $objWriter = IOFactory::createWriter($this->file, $format);
         $objWriter->save($path);
 
         if ($disconnect) {
@@ -220,18 +237,19 @@ class Exporter
      * @param bool $generated
      * @return self
      */
-    public function setGenerated($generated)
+    public function setGenerated(bool $generated): self
     {
         $this->generated = $generated;
+
         return $this;
     }
 
     /**
      * Getter for file
      *
-     * @return \PHPExcel
+     * @return Spreadsheet
      */
-    public function getFile()
+    public function getFile(): Spreadsheet
     {
         return $this->file;
     }
@@ -241,7 +259,7 @@ class Exporter
      *
      * @return Sheet[]
      */
-    public function getSheets()
+    public function getSheets(): array
     {
         return $this->sheets;
     }
@@ -249,10 +267,10 @@ class Exporter
     /**
      * Get a specific sheet, by sheetIndex
      *
-     * @param $sheetIndex
+     * @param int $sheetIndex
      * @return Sheet
      */
-    public function getSheet($sheetIndex = 0)
+    public function getSheet(int $sheetIndex = 0): Sheet
     {
         if (!isset($this->sheets[$sheetIndex])) {
             throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
@@ -268,13 +286,14 @@ class Exporter
      * @param int $sheetIndex
      * @return self
      */
-    public function setWorksheetTitle($title, $sheetIndex = 0)
+    public function setWorksheetTitle(string $title, int $sheetIndex = 0): self
     {
         if (!isset($this->sheets[$sheetIndex])) {
             throw new \InvalidArgumentException(sprintf('No sheet with index %d defined', $sheetIndex));
         }
 
         $this->sheets[$sheetIndex]->getWorksheet()->setTitle($title);
+
         return $this;
     }
 
@@ -283,7 +302,7 @@ class Exporter
      *
      * @return string
      */
-    public function getTempPath()
+    public function getTempPath(): string
     {
         return $this->tempPath;
     }
@@ -293,7 +312,7 @@ class Exporter
      *
      * @return string
      */
-    public function getFileName()
+    public function getFileName(): string
     {
         return $this->fileName;
     }
@@ -303,7 +322,7 @@ class Exporter
      *
      * @return string
      */
-    public function getFilePath()
+    public function getFilePath(): string
     {
         return $this->filePath;
     }
@@ -313,7 +332,7 @@ class Exporter
      *
      * @return bool
      */
-    public function isGenerated()
+    public function isGenerated(): bool
     {
         return $this->generated;
     }

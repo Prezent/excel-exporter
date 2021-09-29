@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Prezent\ExcelExporter;
 
+use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+
 /**
- * Prezent\ExcelExporter\Sheet
- *
  * @author Robert-Jan Bijl <robert-jan@prezent.nl>
  */
 class Sheet
@@ -35,15 +41,15 @@ class Sheet
     private $columns = 1;
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var Worksheet
      */
     private $worksheet;
 
     /**
      * Sheet constructor.
-     * @param \PHPExcel_Worksheet $worksheet
+     * @param Worksheet $worksheet
      */
-    public function __construct(\PHPExcel_Worksheet $worksheet)
+    public function __construct(Worksheet $worksheet)
     {
         $this->worksheet = $worksheet;
         $this->columns = range('A', 'Z');
@@ -58,11 +64,11 @@ class Sheet
 
     /**
      * Reset the coordinates back to initial values
-     *
+     *f
      * @param bool $resetMax
-     * @return Sheet
+     * @return self
      */
-    public function resetCoordinates($resetMax = false)
+    public function resetCoordinates(bool $resetMax = false): self
     {
         $this->currentColumn = reset($this->columns);
         $this->currentRow = 1;
@@ -76,13 +82,45 @@ class Sheet
     }
 
     /**
+     * Write all data for a sheet at once
+     *
+     * @param array $data
+     * @param bool $advancedValueBinder
+     * @return self
+     * @throws Exception
+     */
+    public function writeData(array $data, bool $advancedValueBinder = true): self
+    {
+        if ($advancedValueBinder) {
+            Cell::setValueBinder(new AdvancedValueBinder());
+        }
+
+        $this->worksheet->fromArray($data);
+
+        // update the sheet dimension
+
+        // The max row is simply the size of the array
+        $this->setMaxRow(count($data));
+
+        // The max column is the max size of one of the rows in the array
+        $maxColumn = array_reduce($data, function (int $maxColumn, array $rowData) {
+            $maxColumn = max($maxColumn, count($rowData));
+
+            return $maxColumn;
+        }, 0);
+        $this->setMaxColumn(Coordinate::stringFromColumnIndex($maxColumn));
+
+        return $this;
+    }
+
+    /**
      * Write a row in the sheet
      *
      * @param array $data
      * @param bool $finalize
      * @return self
      */
-    public function writeRow(array $data = [], $finalize = true)
+    public function writeRow(array $data = [], bool $finalize = true): self
     {
         $lastDataKey = $this->getLastArrayKey($data);
         foreach ($data as $key => $value) {
@@ -105,7 +143,7 @@ class Sheet
      *
      * @return string
      */
-    public function getMaxColumn()
+    public function getMaxColumn(): string
     {
         return $this->maxColumn;
     }
@@ -116,10 +154,10 @@ class Sheet
      * @param bool $offsetByOne
      * @return int
      */
-    public function getMaxRow($offsetByOne = true)
+    public function getMaxRow(bool $offsetByOne = true): int
     {
         if ($offsetByOne) {
-            return $this->maxRow -1;
+            return $this->maxRow - 1;
         }
 
         return $this->maxRow;
@@ -130,7 +168,7 @@ class Sheet
      *
      * @return int
      */
-    public function getCurrentRow()
+    public function getCurrentRow(): int
     {
         return $this->currentRow;
     }
@@ -140,7 +178,7 @@ class Sheet
      *
      * @return string
      */
-    public function getCurrentColumn()
+    public function getCurrentColumn(): string
     {
         return $this->currentColumn;
     }
@@ -148,9 +186,9 @@ class Sheet
     /**
      * Getter for worksheet
      *
-     * @return \PHPExcel_Worksheet
+     * @return Worksheet
      */
-    public function getWorksheet()
+    public function getWorksheet(): Worksheet
     {
         return $this->worksheet;
     }
@@ -160,7 +198,7 @@ class Sheet
      *
      * @return array
      */
-    protected function getUsedColumns()
+    protected function getUsedColumns(): array
     {
         if (strlen($this->maxColumn) == 2) {
             $usedColumns = range('A', 'Z');
@@ -185,7 +223,7 @@ class Sheet
      *
      * @return bool
      */
-    public function nextColumn()
+    public function nextColumn(): bool
     {
         $this->currentColumn = next($this->columns);
         $this->updateMaxColumn($this->currentColumn);
@@ -199,7 +237,7 @@ class Sheet
      * @param bool $reset
      * @return bool
      */
-    public function nextRow($reset = true)
+    public function nextRow(bool $reset = true): bool
     {
         $this->currentRow += 1;
         $this->updateMaxRow($this->currentRow);
@@ -214,9 +252,9 @@ class Sheet
      * Update the max column
      *
      * @param string $currentColumn
-     * @return bool
+     * @return mixed
      */
-    private function updateMaxColumn($currentColumn)
+    private function updateMaxColumn(string $currentColumn)
     {
         $max = $this->maxColumn;
 
@@ -238,16 +276,40 @@ class Sheet
     }
 
     /**
+     * Setter for maxRow
+     *
+     * @param int $maxRow
+     * @return self
+     */
+    private function setMaxRow(int $maxRow): self
+    {
+        $this->maxRow = $maxRow;
+
+        return $this;
+    }
+
+    /**
+     * Setter for maxColumn
+     *
+     * @param string $maxColumn
+     * @return self
+     */
+    public function setMaxColumn(string $maxColumn): self
+    {
+        $this->maxColumn = $maxColumn;
+
+        return $this;
+    }
+
+    /**
      * Update the max row
      *
-     * @param $currentRow
-     * @return bool
+     * @param int $currentRow
+     * @return self
      */
-    private function updateMaxRow($currentRow)
+    private function updateMaxRow(int $currentRow): self
     {
-        $this->maxRow = max($currentRow, $this->maxRow);
-
-        return true;
+        return $this->setMaxRow(max($currentRow, $this->maxRow));
     }
 
 
