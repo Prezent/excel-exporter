@@ -1,6 +1,6 @@
 # prezent/excel-exporter
 
-A wrapper around [PHPExcel](https://github.com/PHPOffice/PHPExcel), to allow for easy export of data to Excel files.
+A wrapper around [PhpSpreadsheet](https://github.com/PHPOffice/PhpSpreadsheet), to allow for easy export of data to Excel files.
 
 ## Installation
 

@@ -28,7 +28,7 @@ class StyledExporter extends Exporter
         $borderStyle = array(
             'borders' => array(
                 'outline' => array(
-                    'style' => \PHPExcel_Style_Border::BORDER_MEDIUM,
+                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
                     'color' => array('rgb' => '000000'),
                 ),
             )
@@ -41,16 +41,16 @@ class StyledExporter extends Exporter
         // alignment
         $sheet->getStyle(sprintf('A1:C%d', $maxRow))
             ->getAlignment()
-            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT)
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT)
         ;
         $sheet->getStyle(sprintf('D1:%s%d', $maxColumn, $maxRow))
             ->getAlignment()
-            ->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_RIGHT)
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT)
         ;
     
         // format a specific column as percentage
         $sheet->getStyle(sprintf('G1:G%s', $maxRow))->getNumberFormat()->applyFromArray([
-            'code' => \PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE
+            'code' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_PERCENTAGE
         ]);
     
         return $this;
@@ -58,10 +58,10 @@ class StyledExporter extends Exporter
 }
 ```
 
-Basically, the  `$this->getFile()` function returns an instance of `\PHPExcel`. From here on, you can use all functions that are defined on it.
-For more info, [see the documentation of PHPExcel](https://github.com/PHPOffice/PHPExcel/tree/1.8/Documentation)
+Basically, the  `$this->getFile()` function returns an instance of `\PhpOffice\PhpSpreadsheet\Spreadsheet`. From here on, you can use all functions that are defined on it.
+For more info, [see the documentation of PhpSpreadsheet](https://phpspreadsheet.readthedocs.io/en/latest/)
 
-## Styling with multple worksheets
+## Styling with multiple worksheets
 You can also access the worksheets directly, this can come in handy if you have an Exporter with multiple worksheets (see [Advanced Usage](advanced-usage.md)).
 
 ```php

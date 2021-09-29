@@ -77,7 +77,7 @@ class Exporter
     }
 
     /**
-     * Create the PHPExcel instance to work in
+     * Create the Spreadsheet instance to work in
      *
      * @return Spreadsheet
      */
